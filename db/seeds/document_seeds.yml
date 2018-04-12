@@ -1,0 +1,9 @@
+---
+- project: 'NewProj'
+  name: 'secrets.yml'
+  description: 'AWS credentials'
+  content: 'adslkdasflkhjkdfs'
+- project: 'NewProj'
+  name: 'another.yml'
+  description: 'configuration'
+  content: "---\n-key: something\n  another: value"
