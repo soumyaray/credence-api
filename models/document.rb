@@ -8,7 +8,26 @@ module Credence
   class Document < Sequel::Model
     many_to_one :project
 
+    plugin :uuid, field: :id
     plugin :timestamps
+    plugin :whitelist_security
+    set_allowed_columns :filename, :relative_path, :description, :content
+
+    def description
+      SecureDB.decrypt(self.description_secure)
+    end
+
+    def description=(plaintext)
+      self.description_secure = SecureDB.encrypt(plaintext)
+    end
+
+    def content
+      SecureDB.decrypt(self.content_secure)
+    end
+
+    def content=(plaintext)
+      self.content_secure = SecureDB.encrypt(plaintext)
+    end
 
     # rubocop:disable MethodLength
     def to_json(options = {})
