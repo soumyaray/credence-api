@@ -9,9 +9,11 @@ module Credence
     many_to_one :project
 
     plugin :uuid, field: :id
-    plugin :timestamps
+
     plugin :whitelist_security
     set_allowed_columns :filename, :relative_path, :description, :content
+
+    plugin :timestamps, update_on_create: true
 
     def description
       SecureDB.decrypt(self.description_secure)
@@ -33,19 +35,13 @@ module Credence
     def to_json(options = {})
       JSON(
         {
-          data: {
-            type: 'document',
-            attributes: {
-              id: id,
-              filename: filename,
-              relative_path: relative_path,
-              description: description,
-              content: content
-            }
-          },
-          included: {
-            project: project
-          }
+          type: 'document',
+          id: id,
+          filename: filename,
+          relative_path: relative_path,
+          description: description,
+          content: content,
+          project: project
         }, options
       )
     end

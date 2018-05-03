@@ -32,21 +32,22 @@ end
 namespace :db do
   require_relative 'lib/init' # load libraries
   require_relative 'config/init' # load config info
-  require 'sequel'
-
-  Sequel.extension :migration
   app = Credence::Api
 
-  desc 'Run migrations'
-  task :migrate => :print_env do
-    puts 'Migrating database to latest'
-    Sequel::Migrator.run(app.DB, 'db/migrations')
+  task :setup do
+    require 'sequel'
+    Sequel.extension :migration
   end
 
-  desc 'Delete database'
-  task :delete do
-    app.DB[:documents].delete
-    app.DB[:projects].delete
+  task :load_models do
+    require_relative 'models/init'
+    require_relative 'services/init'
+  end
+
+  desc 'Run migrations'
+  task :migrate => [:setup, :print_env] do
+    puts 'Migrating database to latest'
+    Sequel::Migrator.run(app.DB, 'db/migrations')
   end
 
   desc 'Delete dev or test database file'
@@ -62,6 +63,22 @@ namespace :db do
 
   desc 'Delete and migrate again'
   task reset: [:drop, :migrate]
+
+  task :reset_seeds => [:setup, :load_models] do
+    app.DB[:schema_seeds].delete if app.DB.tables.include?(:schema_seeds)
+    Credence::Account.dataset.destroy
+  end
+
+  desc 'Seeds the development database'
+  task :seed => [:setup, :print_env, :load_models] do
+    require 'sequel/extensions/seed'
+    Sequel::Seed.setup(:development)
+    Sequel.extension :seed
+    Sequel::Seeder.apply(app.DB, 'db/seeds')
+  end
+
+  desc 'Delete all data and reseed'
+  task reseed: [:reset_seeds, :seed]
 end
 
 namespace :newkey do

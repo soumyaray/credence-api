@@ -13,37 +13,42 @@ describe 'Test Document Handling' do
     end
   end
 
-  it 'HAPPY: should be able to get list of all documents' do
-    proj = Credence::Project.first
-    DATA[:documents].each do |doc|
-      proj.add_document(doc)
+  describe 'Getting Document' do
+    before do
+      @proj = Credence::Project.first
+      DATA[:documents].each do |doc_data|
+        Credence::CreateDocumentForProject.call(
+          project_id: @proj.id,
+          document_data: doc_data
+        )
+      end
     end
 
-    get "api/v1/projects/#{proj.id}/documents"
-    _(last_response.status).must_equal 200
+    it 'HAPPY: should be able to get list of all documents' do
+      get "api/v1/projects/#{@proj.id}/documents"
+      _(last_response.status).must_equal 200
 
-    result = JSON.parse last_response.body
-    _(result['data'].count).must_equal 2
-  end
+      result = JSON.parse last_response.body
+      _(result.count).must_equal DATA[:documents].count
+    end
 
-  it 'HAPPY: should be able to get details of a single document' do
-    doc_data = DATA[:documents][1]
-    proj = Credence::Project.first
-    doc = proj.add_document(doc_data)
+    it 'HAPPY: should be able to get details of a single document' do
+      doc = Credence::Document.first
 
-    get "/api/v1/projects/#{proj.id}/documents/#{doc.id}"
-    _(last_response.status).must_equal 200
+      get "/api/v1/projects/#{@proj.id}/documents/#{doc.id}"
+      _(last_response.status).must_equal 200
 
-    result = JSON.parse last_response.body
-    _(result['data']['attributes']['id']).must_equal doc.id
-    _(result['data']['attributes']['filename']).must_equal doc_data['filename']
-  end
+      result = JSON.parse last_response.body
+      _(result['id']).must_equal doc.id
+      _(result['filename']).must_equal doc.filename
+    end
 
-  it 'SAD: should return error if unknown document requested' do
-    proj = Credence::Project.first
-    get "/api/v1/projects/#{proj.id}/documents/foobar"
+    it 'SAD: should return error if unknown document requested' do
+      proj = Credence::Project.first
+      get "/api/v1/projects/#{proj.id}/documents/foobar"
 
-    _(last_response.status).must_equal 404
+      _(last_response.status).must_equal 404
+    end
   end
 
   describe 'Creating Documents' do
@@ -59,7 +64,7 @@ describe 'Test Document Handling' do
       _(last_response.status).must_equal 201
       _(last_response.header['Location'].size).must_be :>, 0
 
-      created = JSON.parse(last_response.body)['data']['data']['attributes']
+      created = JSON.parse(last_response.body)['data']
       doc = Credence::Document.first
 
       _(created['id']).must_equal doc.id
