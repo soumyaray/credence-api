@@ -17,10 +17,16 @@ gem 'rbnacl-libsodium'
 # Database
 gem 'sequel'
 gem 'hirb'
+
 group :development, :test do
   gem 'sequel-seed'
   gem 'sqlite3'
 end
+
+group :production do
+  gem 'pg'
+end
+
 
 # Testing
 group :test do
