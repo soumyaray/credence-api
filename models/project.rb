@@ -8,7 +8,8 @@ module Credence
   class Project < Sequel::Model
     many_to_one :owner, class: :'Credence::Account'
 
-    many_to_many :collaborators, class: :'Credence::Account',
+    many_to_many :collaborators,
+                 class: :'Credence::Account',
                  join_table: :accounts_projects,
                  left_key: :project_id, right_key: :collaborator_id
 

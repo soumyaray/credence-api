@@ -7,7 +7,7 @@ module Credence
       collaborator = Account.first(email: email)
       project = Project.first(id: project_id)
       return false if project.owner.id == collaborator.id
-      collaborator.add_project(project)
+      project.add_collaborator
       collaborator
     end
   end
