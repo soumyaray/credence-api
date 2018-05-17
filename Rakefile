@@ -29,6 +29,11 @@ task :console => :print_env do
   sh 'pry -r ./specs/test_load_all'
 end
 
+desc 'Run application in development mode and port'
+task :run_dev do
+  sh 'rerun -c "rackup -p 3000"'
+end
+
 namespace :db do
   require_relative 'lib/init' # load libraries
   require_relative 'config/init' # load config info

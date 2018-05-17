@@ -12,6 +12,7 @@ gem 'rake'
 
 # Diagnostic
 gem 'pry'
+gem 'rack-test'
 
 # Security
 gem 'rbnacl-libsodium'
@@ -34,7 +35,6 @@ end
 group :test do
   gem 'minitest'
   gem 'minitest-rg'
-  gem 'rack-test'
 end
 
 # Development
