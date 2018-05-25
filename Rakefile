@@ -86,10 +86,16 @@ namespace :db do
   task reseed: [:reset_seeds, :seed]
 end
 
-namespace :newkey do
+namespace :generate do
   desc 'Create sample cryptographic key for database'
-  task :db do
+  task :db_key do
     require './lib/secure_db'
     puts "DB_KEY: #{SecureDB.generate_key}"
+  end
+
+  desc 'Create sample cryptographic key for tokens and messaging'
+  task :msg_key do
+    require './lib/auth_token'
+    puts "MSG_KEY: #{SecureDB.generate_key}"
   end
 end

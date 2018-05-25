@@ -36,7 +36,8 @@ module Credence
         DB
       end
 
-      SecureDB.setup(config)
+      SecureDB.setup(config.DB_KEY)
+      AuthToken.setup(config.MSG_KEY)
     end
   end
 end
