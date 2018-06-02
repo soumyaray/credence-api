@@ -21,14 +21,24 @@ module Credence
     plugin :whitelist_security
     set_allowed_columns :name, :repo_url
 
+    def to_h
+      {
+        type: 'project',
+        id: id,
+        name: name,
+        repo_url: repo_url
+      }
+    end
+
     def to_json(options = {})
-      JSON(
-        {
-          type: 'project',
-          id: id,
-          name: name,
-          repo_url: repo_url
-        }, options
+      JSON(to_h, options)
+    end
+
+    def full_details
+      to_h.merge(
+        owner: owner,
+        collaborators: collaborators,
+        documents: documents
       )
     end
   end
