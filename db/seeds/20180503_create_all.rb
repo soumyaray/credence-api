@@ -20,7 +20,7 @@ CONTRIB_INFO = YAML.load_file("#{DIR}/projects_collaborators.yml")
 
 def create_accounts
   ACCOUNTS_INFO.each do |account_info|
-    Credence::Account.create(account_info)
+    Credence::EmailAccount.create(account_info)
   end
 end
 

@@ -1,9 +1,15 @@
+# frozen_string_literal: true
+
 require 'sequel'
 require 'json'
 
 module Credence
   # Models a registered account
   class Account < Sequel::Model
+    plugin :single_table_inheritance, :type,
+           model_map: { 'email' => 'Credence::EmailAccount',
+                        'sso'   => 'Credence::SsoAccount' }
+
     one_to_many :owned_projects, class: :'Credence::Project', key: :owner_id
     plugin :association_dependencies, owned_projects: :destroy
 
@@ -21,20 +27,10 @@ module Credence
       owned_projects + collaborations
     end
 
-    def password=(new_password)
-      self.salt = SecureDB.new_salt
-      self.password_hash = SecureDB.hash_password(salt, new_password)
-    end
-
-    def password?(try_password)
-      try_hashed = SecureDB.hash_password(salt, try_password)
-      try_hashed == password_hash
-    end
-
     def to_json(options = {})
       JSON(
         {
-          type: 'account',
+          type: type,
           username: username,
           email: email
         }, options

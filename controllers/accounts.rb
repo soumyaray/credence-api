@@ -8,10 +8,6 @@ module Credence
     route('accounts') do |routing|
       @account_route = "#{@api_root}/accounts"
 
-      routing.on 'authenticate' do
-        routing.route('authenticate', 'accounts')
-      end
-
       routing.on String do |username|
         # GET api/v1/accounts/[USERNAME]
         routing.get do

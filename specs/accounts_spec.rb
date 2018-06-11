@@ -31,13 +31,13 @@ describe 'Test Document Handling' do
       @account_data = DATA[:accounts][1]
     end
 
-    it 'HAPPY: should be able to create new accounts' do
+    it 'HAPPY: should be able to create new email accounts' do
       post 'api/v1/accounts', @account_data.to_json, @req_header
       _(last_response.status).must_equal 201
       _(last_response.header['Location'].size).must_be :>, 0
 
       created = JSON.parse(last_response.body)['data']
-      account = Credence::Account.first
+      account = Credence::EmailAccount.first
 
       _(created['username']).must_equal @account_data['username']
       _(created['email']).must_equal @account_data['email']
@@ -64,7 +64,7 @@ describe 'Test Document Handling' do
     it 'HAPPY: should authenticate valid credentials' do
       credentials = { username: @account_data['username'],
                       password: @account_data['password'] }
-      post 'api/v1/accounts/authenticate', credentials.to_json, @req_header
+      post 'api/v1/auth/authenticate', credentials.to_json, @req_header
 
       _(last_response.status).must_equal 200
       auth_account = JSON.parse(last_response.body)
