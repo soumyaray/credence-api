@@ -19,7 +19,7 @@ module Credence
     end
 
     def email_body(registration)
-      verification_url = registration['verification_url']
+      verification_url = registration[:verification_url]
 
       <<~END_EMAIL
         <H1>Credent Registration Received<H1>
@@ -36,7 +36,7 @@ module Credence
         SENDGRID_URL,
         json: {
           personalizations: [{
-            to: [{ 'email' => registration['email'] }]
+            to: [{ 'email' => registration[:email] }]
           }],
           from: { 'email' => 'noreply@credent.com' },
           subject: 'Credent Registration Verification',

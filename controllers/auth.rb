@@ -13,8 +13,9 @@ module Credence
       routing.on 'register' do
         # POST api/v1/auth/register
         routing.post do
-          reg_data = JSON.parse(routing.body.read)
-          EmailVerification.new(Api.config).call(reg_data)
+          registration = SignedRequest.new(Api.config)
+                                      .parse(request.body.read)
+          EmailVerification.new(Api.config).call(registration)
 
           response.status = 201
           { message: 'Verification email sent' }.to_json

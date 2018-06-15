@@ -9,7 +9,9 @@ module Credence
       routing.on do
         # POST /api/v1/auth/authenticate/sso_account
         routing.post 'sso_account' do
-          auth_request = JsonRequestBody.parse_symbolize(request.body.read)
+          auth_request = SignedRequest
+                         .new(Api.config)
+                         .parse(request.body.read)
 
           sso_account, auth_token =
             AuthenticateSsoAccount.new(Api.config)
@@ -23,7 +25,9 @@ module Credence
 
         # POST /api/v1/auth/authenticate/email_account
         routing.post 'email_account' do
-          credentials = JsonRequestBody.parse_symbolize(request.body.read)
+          credentials = SignedRequest
+                        .new(Api.config)
+                        .parse(request.body.read)
           auth_account = AuthenticateEmailAccount.call(credentials)
           auth_account.to_json
         rescue StandardError => error
