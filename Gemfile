@@ -22,10 +22,10 @@ gem 'http'
 
 # Database
 gem 'sequel'
+gem 'sequel-seed'
 gem 'hirb'
 
 group :development, :test do
-  gem 'sequel-seed'
   gem 'sqlite3'
 end
 

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'base64'
+
 require_relative 'securable'
 
 ## Encrypt and Decrypt Authorization Tokens
