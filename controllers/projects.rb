@@ -22,6 +22,67 @@ module Credence
         rescue StandardError
           routing.halt 404, { message: 'Project not found' }.to_json
         end
+
+        routing.on('documents') do
+          # POST api/v1/projects/[proj_id]/documents
+          routing.post do
+            account = Account.first(username: @auth_account['username'])
+            project = Project.first(id: proj_id)
+            doc_data = JSON.parse(routing.body.read)
+
+            requestor = ProjectPolicy.new(account, project)
+            raise unless requestor.can_add_documents?
+
+            new_document = project.add_document(doc_data)
+            response.status = 201
+            new_document.to_json
+          rescue StandardError => error
+            puts error.inspect
+            puts error.backtrace
+            routing.halt 400, { message: 'Could not add document' }.to_json
+          end
+        end
+
+        routing.on('collaborators') do # rubocop:disable Metrics/BlockLength
+          # PUT api/v1/projects/[proj_id]/collaborators
+          routing.put do
+            account = Account.first(username: @auth_account['username'])
+            project = Project.first(id: proj_id)
+            req_data = JSON.parse(routing.body.read)
+            collaborator = Account.first(email: req_data['email'])
+
+            requestor = ProjectPolicy.new(account, project)
+            outsider = ProjectPolicy.new(collaborator, project)
+
+            raise unless requestor.can_add_collaborators? &&
+                         outsider.can_collaborate?
+
+            project.add_collaborator(collaborator)
+            collaborator.to_json
+          rescue StandardError
+            routing.halt 400, { message: 'Could not add collaborator' }.to_json
+          end
+
+          # DELETE api/v1/projects/[proj_id]/collaborators
+          routing.delete do
+            account = Account.first(username: @auth_account['username'])
+            project = Project.first(id: proj_id)
+            req_data = JSON.parse(routing.body.read)
+            collaborator = Account.first(email: req_data['email'])
+
+            requestor = ProjectPolicy.new(account, project)
+
+            raise unless requestor.can_remove_collaborators? &&
+                         project.collaborators.include?(collaborator)
+
+            project.remove_collaborator(collaborator)
+            collaborator.to_json
+          rescue StandardError => error
+            puts error.inspect
+            puts error.backtrace
+            routing.halt 400, { message: 'Could not remove collaborator' }.to_json
+          end
+        end
       end
 
       # GET api/v1/projects
@@ -37,9 +98,9 @@ module Credence
 
       # POST api/v1/projects
       routing.post do
+        account = Account.first(username: @auth_account['username'])
         new_data = JSON.parse(routing.body.read)
-        new_proj = Project.new(new_data)
-        raise('Could not save project') unless new_proj.save
+        new_proj = account.add_owned_project(new_data)
 
         response.status = 201
         response['Location'] = "#{@proj_route}/#{new_proj.id}"

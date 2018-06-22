@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Credence
-  # Policy to determine if an account can view a particular project
+  # Policy to determine if an account can interact with a particular project
   class ProjectPolicy
     def initialize(account, project)
       @account = account
@@ -41,6 +41,11 @@ module Credence
       account_is_owner?
     end
 
+    def can_collaborate?
+      not (account_is_owner? or account_is_collaborator?)
+    end
+
+    # Summary of account owner or collaborator's policies
     def summary
       {
         can_view: can_view?,
@@ -50,7 +55,8 @@ module Credence
         can_add_documents: can_add_documents?,
         can_delete_documents: can_remove_documents?,
         can_add_collaborators: can_add_collaborators?,
-        can_remove_collaborators: can_remove_collaborators?
+        can_remove_collaborators: can_remove_collaborators?,
+        can_collaborate: can_collaborate?
       }
     end
 
